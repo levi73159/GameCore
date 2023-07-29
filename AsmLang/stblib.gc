@@ -1,0 +1,20 @@
+; stdlib.gc - Custom Standard Library
+jmp stblib_end
+
+; Function to handle errors and exit the program
+handleError:
+    write Error occurred.
+    setAV dr7 -1 ; Set the exit code to -1 (indicating an error)
+    exit
+
+; Function to handle division by zero error and exit the program
+handleDivisionByZero:
+    write Error: Division by zero is not allowed.
+    setAV dr7 -1 ; Set the exit code to -1 (indicating an error)
+    exit
+    
+errorExit:
+    setAV dr7 -1 ; Set the exit code to -1 (indicating an error)
+    exit
+    
+stblib_end:

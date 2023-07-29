@@ -1,0 +1,92 @@
+start:
+writeln Welcome to RPS Game!
+writeln Choose one of the following options:
+writeln 1. Rock
+writeln 2. Paper
+writeln 3. Scissors
+
+readline edx
+convertAV edx
+
+jf .error ; if failed the jump to error
+
+rand 1 4
+
+setAV eax 2
+cmp edi eax
+
+#max es
+#min cs
+
+setAV %max% 3 ; max
+setAV %min% 1 ; min
+
+jnz .Paper
+jg .Scissors
+jl .Rock
+jmp .error
+
+.Paper:
+    writeln AI picked Paper
+    jmp .next
+
+.Scissors:
+    writeln AI picked Scissors
+    jmp .next
+
+.Rock:
+    writeln AI picked Rock
+    jmp .next
+.next:
+
+cmp edx edi
+jnz .Tie
+
+sub edx 1
+call loop_back
+cmp edx edi 
+jnz .Player_Wins
+
+add edx 2
+call loop_back
+cmp edx edi
+jnz .AI_Wins
+
+
+jmp .error
+
+.Tie:
+    writeln It's a tie!
+    jmp .end
+.Player_Wins:
+    writeln Player wins
+    jmp .end
+.AI_Wins:
+    writeln AI wins
+    jmp .end
+
+loop_back:
+    cmp edx %min%
+    jl .less
+    cmp edx %max%
+    jg .greater
+    ret
+
+.greater:
+    sub edx 3
+    ret
+
+.less:
+    add edx 3
+    ret
+
+.error:
+    writeln Error
+    setAV dr7 -1
+    exit
+
+.end:
+    write press any key to continue...
+    getkey
+    clear
+    jmp start
