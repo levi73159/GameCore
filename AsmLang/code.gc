@@ -1,92 +1,38 @@
-start:
-writeln Welcome to RPS Game!
-writeln Choose one of the following options:
-writeln 1. Rock
-writeln 2. Paper
-writeln 3. Scissors
+#newline 10 ; the ASCII representation of the newline
+#input1Address 100 ; Memory address to store the first input
+#input2Address 101 ; Memory address to store the second input
+#resultAddress 102 ; Memory address to store the result
 
-readline edx
-convertAV edx
+; Read the first number from the user and store it in memory
+writeln "Enter the first number:"
+readline
+convertAV cr0
+writeRawMem %input1Address% cr0
 
-jf .error ; if failed the jump to error
+; Read the second number from the user and store it in memory
+writeln "Enter the second number:"
+readline
+convertAV cr0
+writeRawMem %input2Address% cr0
 
-rand 1 4
+; Load the first input from memory into eax
+readMem %input1Address%
+break
+mov eax .mem
 
-setAV eax 2
-cmp edi eax
+; Load the second input from memory into ebx
+readMem %input2Address%
+break
+mov ebx .mem
 
-#max es
-#min cs
+; Add the two inputs and store the result in memory
+break
+add eax ebx
+writeRawMem %resultAddress% eax
+break
 
-setAV %max% 3 ; max
-setAV %min% 1 ; min
+; Display the result
+writeln "The sum is:"
+printRawMem %resultAddress% 0
 
-jnz .Paper
-jg .Scissors
-jl .Rock
-jmp .error
-
-.Paper:
-    writeln AI picked Paper
-    jmp .next
-
-.Scissors:
-    writeln AI picked Scissors
-    jmp .next
-
-.Rock:
-    writeln AI picked Rock
-    jmp .next
-.next:
-
-cmp edx edi
-jnz .Tie
-
-sub edx 1
-call loop_back
-cmp edx edi 
-jnz .Player_Wins
-
-add edx 2
-call loop_back
-cmp edx edi
-jnz .AI_Wins
-
-
-jmp .error
-
-.Tie:
-    writeln It's a tie!
-    jmp .end
-.Player_Wins:
-    writeln Player wins
-    jmp .end
-.AI_Wins:
-    writeln AI wins
-    jmp .end
-
-loop_back:
-    cmp edx %min%
-    jl .less
-    cmp edx %max%
-    jg .greater
-    ret
-
-.greater:
-    sub edx 3
-    ret
-
-.less:
-    add edx 3
-    ret
-
-.error:
-    writeln Error
-    setAV dr7 -1
-    exit
-
-.end:
-    write press any key to continue...
-    getkey
-    clear
-    jmp start
+exit

@@ -19,6 +19,6 @@ public class Reg
 
     public override string ToString()
     {
-        return $"{Name}-{Id}: {Value} av={AV} fv={Convert.ToString(FV, 2).PadLeft(6, '0')} lv={LV}";
+        return $"{Name}-{Id}: {Value} av={AV} fv={Convert.ToString(FV, 2).PadLeft(7, '0')} lv={LV}";
     }
 }

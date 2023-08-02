@@ -5,6 +5,8 @@ namespace AsmLang.Core;
 public class RegList : Dictionary<string, Reg>
 {
     private List<int> _stackList; // List to represent the stack
+    public int[] Memory;
+    public Dictionary<string, uint> MemoryLabels;
 
     public RegList()
     {
@@ -50,6 +52,7 @@ public class RegList : Dictionary<string, Reg>
 
         // special registers
         Add(".flags", new Reg(".flags", 31));
+        Add(".mem", new Reg(".mem", 32));
     }
 
     public int Eip

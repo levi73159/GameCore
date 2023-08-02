@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
 namespace AsmLang.Core;
 
 public class CommandHandler
@@ -5,11 +10,10 @@ public class CommandHandler
     private readonly Dictionary<string, Command> _commands;
     private Dictionary<string, string> _macros;
 
-
     public CommandHandler(IEnumerable<Command> commands)
     {
         _commands = new Dictionary<string, Command>();
-        
+
         foreach (var command in commands)
         {
             _commands.Add(command.Name, command);
@@ -22,20 +26,20 @@ public class CommandHandler
 
     public void ExecuteCommands(string[] code, ref RegList regs)
     {
+        Util.InitializeMemory(ref regs.Memory, ref regs.MemoryLabels, 65775);
         code = ReplaceImports(code);
         code = code.Select(line => RemoveComment(line)).Where(line => !string.IsNullOrWhiteSpace(line) && !string.IsNullOrEmpty(line)).ToArray();
-        
+
         Commands.GetOS(regs, Array.Empty<string>());
         Commands.Labels = Util.FindLabels(code);
         _macros = Util.FindMacros(code);
-
 
         // Replace macros in the code with their values (if they exist) or remove them if they don't
         for (var i = 0; i < code.Length; i++)
         {
             code[i] = ReplaceMacro(code[i]);
         }
-        
+
         regs.Eip = 0;
         while (regs.Eip < code.Length)
         {
@@ -87,7 +91,6 @@ public class CommandHandler
         return lines.ToArray();
     }
 
-
     private string ReplaceMacro(string line)
     {
         var macroIndex = line.IndexOf('%');
@@ -101,7 +104,7 @@ public class CommandHandler
                 macroIndex = line.IndexOf('%', macroIndex);
                 continue;
             }
-        
+
             var macroName = line.Substring(macroIndex + 1, macroEndIndex - macroIndex - 1);
 
             if (_macros.TryGetValue(macroName, out var macro))
@@ -120,7 +123,6 @@ public class CommandHandler
         return line;
     }
 
-    
     private string RemoveComment(string line)
     {
         int commentIndex = line.IndexOf(';');
@@ -133,9 +135,10 @@ public class CommandHandler
 
     public bool CallCommand(ref RegList regs, string commandString)
     {
-        var spl = commandString.Split();
+        var spl = commandString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
         var name = spl[0];
-        var @params = spl.Skip(1).ToArray();
+        var paramsString = string.Join(" ", spl.Skip(1));
+        var @params = ParseParameters(paramsString);
 
         if (!_commands.ContainsKey(name))
         {
@@ -146,6 +149,37 @@ public class CommandHandler
         _commands[name].Invoke(regs, @params);
         return true;
     }
-    
-    
+
+    private string[] ParseParameters(string paramsString)
+    {
+        var parameters = new List<string>();
+        var currentParam = "";
+        var inQuote = false;
+
+        for (int i = 0; i < paramsString.Length; i++)
+        {
+            char c = paramsString[i];
+
+            if (c == '"' && (i == 0 || paramsString[i - 1] != '\\'))
+            {
+                inQuote = !inQuote;
+            }
+            else if (c == ' ' && !inQuote)
+            {
+                parameters.Add(currentParam);
+                currentParam = "";
+            }
+            else
+            {
+                currentParam += c;
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(currentParam))
+        {
+            parameters.Add(currentParam);
+        }
+
+        return parameters.ToArray();
+    }
 }
