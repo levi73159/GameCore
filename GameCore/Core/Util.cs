@@ -1,6 +1,6 @@
-namespace AsmLang.Core;
+namespace GameCore.Core;
 
-public static class Util
+internal static class Util
 {
     public static Dictionary<string, int> FindLabels(string[] code)
     {
@@ -38,7 +38,7 @@ public static class Util
             if (!trimmedLine.StartsWith("#")) continue;
             
             // Remove the '#' character and split the line into name and value parts
-            string[] parts = trimmedLine.Substring(1).Split(new char[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = trimmedLine.Substring(1).Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length != 2)
             {
@@ -56,10 +56,10 @@ public static class Util
         return macros;
     }
 
+    private const int MinMemory = 10000;
     public static void InitializeMemory(ref int[] memory, ref Dictionary<string, uint> memoryLabels, uint memSize)
     {
-        const int MIN_MEMORY = 10000;
-        if (memSize < MIN_MEMORY)
+        if (memSize < MinMemory)
             return;
         memory = new int[memSize];
         memoryLabels = new Dictionary<string, uint>();

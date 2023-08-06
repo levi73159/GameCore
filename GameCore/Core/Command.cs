@@ -1,4 +1,4 @@
-namespace AsmLang.Core;
+namespace GameCore.Core;
 
 public class Command
 {

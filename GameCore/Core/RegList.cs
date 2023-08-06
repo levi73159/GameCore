@@ -1,6 +1,4 @@
-using System.Collections;
-
-namespace AsmLang.Core;
+namespace GameCore.Core;
 
 public class RegList : Dictionary<string, Reg>
 {
@@ -10,6 +8,8 @@ public class RegList : Dictionary<string, Reg>
 
     public RegList()
     {
+        Memory = Array.Empty<int>();
+        MemoryLabels = new Dictionary<string, uint>();
         _stackList = new List<int>();
         Add("eax", new Reg("eax", 0));
         Add("ebx", new Reg("ebx", 1));
@@ -57,8 +57,8 @@ public class RegList : Dictionary<string, Reg>
 
     public int Eip
     {
-        get => this["eip"].AV;
-        set => this["eip"].AV = value;
+        get => this["eip"].Av;
+        set => this["eip"].Av = value;
     }
 
     public bool StackIsEmpty => _stackList.Count == 0;
@@ -93,7 +93,7 @@ public class RegList : Dictionary<string, Reg>
     public void SetRegisterValue(string regName, int v)
     {
         if (TryGetValue(regName, out var reg))
-            reg.AV = v;
+            reg.Av = v;
         else
             Console.WriteLine($"Warning: Invalid register name, {regName}");
     }
@@ -101,7 +101,7 @@ public class RegList : Dictionary<string, Reg>
     public void SetRegisterValue(string regName, long v)
     {
         if (TryGetValue(regName, out var reg)) 
-            reg.LV = v;
+            reg.Lv = v;
         else
             Console.WriteLine($"Warning: Invalid register name, {regName}");
     }
@@ -109,7 +109,7 @@ public class RegList : Dictionary<string, Reg>
     public void SetRegisterFlags(string regName, int flags)
     {
         if (TryGetValue(regName, out var reg)) 
-            reg.FV = flags;
+            reg.Fv = flags;
         else
             Console.WriteLine($"Warning: Invalid register name, {regName}");
     }
@@ -117,18 +117,18 @@ public class RegList : Dictionary<string, Reg>
     public void SetFlag(Flags flag, bool value)
     {
         if (value)
-            this[".flags"].FV |= (int)flag;
+            this[".flags"].Fv |= (int)flag;
         else
-            this[".flags"].FV &= ~(int)flag;
+            this[".flags"].Fv &= ~(int)flag;
     }
 
     public bool GetFlag(Flags flag)
     {
-        return (this[".flags"].FV & (int)flag) != 0;
+        return (this[".flags"].Fv & (int)flag) != 0;
     }
 
     public object? GetValue(string regName) => TryGetValue(regName, out var reg) ? reg.Value : null;
-    public int GetAV(string regName) => TryGetValue(regName, out var reg) ? reg.AV : -1;
-    public int GetFV(string regName) => TryGetValue(regName, out var reg) ? reg.FV : 0;
-    public long GetLV(string regName) => TryGetValue(regName, out var reg) ? reg.LV : -1;
+    public int GetAv(string regName) => TryGetValue(regName, out var reg) ? reg.Av : -1;
+    public int GetFv(string regName) => TryGetValue(regName, out var reg) ? reg.Fv : 0;
+    public long GetLv(string regName) => TryGetValue(regName, out var reg) ? reg.Lv : -1;
 }

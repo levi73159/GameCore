@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-namespace AsmLang.Core;
+namespace GameCore.Core;
 
 public class CommandHandler
 {
@@ -13,6 +8,7 @@ public class CommandHandler
     public CommandHandler(IEnumerable<Command> commands)
     {
         _commands = new Dictionary<string, Command>();
+        _macros = new Dictionary<string, string>();
 
         foreach (var command in commands)
         {
@@ -30,7 +26,7 @@ public class CommandHandler
         code = ReplaceImports(code);
         code = code.Select(line => RemoveComment(line)).Where(line => !string.IsNullOrWhiteSpace(line) && !string.IsNullOrEmpty(line)).ToArray();
 
-        Commands.GetOS(regs, Array.Empty<string>());
+        Commands.GetOs(regs, Array.Empty<string>());
         Commands.Labels = Util.FindLabels(code);
         _macros = Util.FindMacros(code);
 

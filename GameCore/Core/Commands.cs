@@ -1,20 +1,18 @@
-namespace AsmLang.Core;
 using System.Diagnostics;
 
+namespace GameCore.Core;
 
 public static class Commands
 {
-    public static Dictionary<string, int> Labels { get; set; }
-
-
-
+    public static Dictionary<string, int> Labels { get; set; } = new();
+    
     public static IEnumerable<Command> GetBasicCommands()
     {
         return new[]
         {
             new Command("set", Set),
-            new Command("setAV", SetAV),
-            new Command("setLV", SetLV),
+            new Command("setAV", SetAv),
+            new Command("setLV", SetLv),
             new Command("add", Add),
             new Command("div", Div),
             new Command("mod", Mod),
@@ -48,19 +46,19 @@ public static class Commands
             new Command("readline", ReadLine),
             new Command("getkey", GetKey),
             new Command("writeSrc", WriteSrc),
-            new Command("writeAV", WriteAV),
-            new Command("writeLV", WriteLV),
+            new Command("writeAV", WriteAv),
+            new Command("writeLV", WriteLv),
             new Command("newline", NewLine),
             new Command("wait", Wait),
             new Command("call", Call),
             new Command("ret", Return),
             new Command("exit", Exit),
-            new Command("convertAV", ConvertSrcToAV),
+            new Command("convertAV", ConvertSrcToAv),
             new Command("shl", ShiftLeft),
             new Command("shr", ShiftRight),
             new Command("rand", Random),
             new Command("beep", Beep),
-            new Command("getOS", GetOS),
+            new Command("getOS", GetOs),
             new Command("not", Not),
             new Command("cmov", ConditionalMove),
             new Command("loop", Loop),
@@ -86,7 +84,7 @@ public static class Commands
             return;
         }
 
-        if (!int.TryParse(args[0], out var destAddress)) destAddress = regs.GetAV(args[0]);
+        if (!int.TryParse(args[0], out var destAddress)) destAddress = regs.GetAv(args[0]);
         var memory = Util.ReadMemory(regs.Memory, (uint)destAddress);
         
         regs.SetRegisterValue(".mem", Convert.ToChar(memory));
@@ -103,11 +101,11 @@ public static class Commands
         }
         
         if (!int.TryParse(args[1], out var value))
-            value = regs.GetAV(args[1]);
+            value = regs.GetAv(args[1]);
         
 
         if (!int.TryParse(args[0], out var destAddress))
-            destAddress = regs.GetAV(args[0]);
+            destAddress = regs.GetAv(args[0]);
         
         Util.WriteMemory(regs.Memory, (uint)destAddress, value);
     }
@@ -121,7 +119,7 @@ public static class Commands
         }
         
         if (!int.TryParse(args[0], out var destAddress))
-            destAddress = regs.GetAV(args[0]);
+            destAddress = regs.GetAv(args[0]);
 
 
         var offset = 0;
@@ -202,13 +200,13 @@ public static class Commands
         }
 
         if (!int.TryParse(args[0], out var start))
-            start = regs.GetAV(args[0]);
+            start = regs.GetAv(args[0]);
         
         if (!int.TryParse(args[1], out var end))
-            end = regs.GetAV(args[1]);
+            end = regs.GetAv(args[1]);
         
         if (!int.TryParse(args[2], out var value))
-            value = regs.GetAV(args[2]);
+            value = regs.GetAv(args[2]);
 
         Util.FillMemory(regs.Memory, (uint)start, (uint)end, value);
     }
@@ -223,13 +221,13 @@ public static class Commands
         }
 
         if (!int.TryParse(args[0], out var src))
-            src = regs.GetAV(args[0]);
+            src = regs.GetAv(args[0]);
         
         if (!int.TryParse(args[1], out var dest))
-            dest = regs.GetAV(args[1]);
+            dest = regs.GetAv(args[1]);
         
         if (!int.TryParse(args[2], out var len))
-            len = regs.GetAV(args[2]);
+            len = regs.GetAv(args[2]);
         
         Util.CopyMemory(regs.Memory, (uint)src, (uint) dest, (uint)len);
     }
@@ -243,13 +241,13 @@ public static class Commands
         }
 
         if (!int.TryParse(args[0], out var memoryAddressA))
-            memoryAddressA = regs.GetAV(args[0]);
+            memoryAddressA = regs.GetAv(args[0]);
 
         if (!int.TryParse(args[1], out var memoryAddressB))
-            memoryAddressB = regs.GetAV(args[1]);
+            memoryAddressB = regs.GetAv(args[1]);
 
         if (!int.TryParse(args[2], out var size))
-            size = regs.GetAV(args[2]);
+            size = regs.GetAv(args[2]);
 
         // Ensure that memoryAddressA and memoryAddressB are valid addresses
         if (memoryAddressA < 0 || memoryAddressA >= regs.Memory.Length ||
@@ -284,14 +282,14 @@ public static class Commands
         }
 
         if (!int.TryParse(args[0], out var memoryAddressA))
-            memoryAddressA = regs.GetAV(args[0]);
+            memoryAddressA = regs.GetAv(args[0]);
 
         var isGen = false;
         if (!int.TryParse(args[1], out var memoryAddressB))
         {
             if (regs.TryGetValue(args[1], out var reg))
             {
-                memoryAddressB = reg.AV;
+                memoryAddressB = reg.Av;
             }
             else
             {
@@ -339,14 +337,14 @@ public static class Commands
 
     private static void Not(RegList regs, string[] args)
     {
-        regs.SetRegisterValue(args[0], ~regs.GetAV(args[0]));
+        regs.SetRegisterValue(args[0], ~regs.GetAv(args[0]));
     }
 
-    public static void GetOS(RegList regs, string[] args)
+    public static void GetOs(RegList regs, string[] args)
     {
         var reg = regs["dr0"];
 
-        reg.AV = (int)Environment.OSVersion.Platform;
+        reg.Av = (int)Environment.OSVersion.Platform;
         reg.Value = Environment.OSVersion.VersionString;
     }
 
@@ -365,10 +363,10 @@ public static class Commands
         }
         
         if (!int.TryParse(args[0], out var frequency))
-            frequency = regs.GetAV(args[0]);
+            frequency = regs.GetAv(args[0]);
 
         if (!int.TryParse(args[1], out var duration))
-            duration = regs.GetAV(args[1]);
+            duration = regs.GetAv(args[1]);
 
         if (OperatingSystem.IsWindows())
             Console.Beep(frequency, duration);
@@ -376,17 +374,17 @@ public static class Commands
             Console.WriteLine("beep only supported for Windows");
     }
 
-    private static void SetLV(RegList regs, string[] args)
+    private static void SetLv(RegList regs, string[] args)
     {
         if (!long.TryParse(args[1], out var lv))
-            lv = regs.GetLV(args[1]);
+            lv = regs.GetLv(args[1]);
         regs.SetRegisterValue(args[0], lv);
     }
 
-    private static void SetAV(RegList regs, string[] args)
+    private static void SetAv(RegList regs, string[] args)
     {
         if (!int.TryParse(args[1], out var av))
-            av = regs.GetAV(args[1]);
+            av = regs.GetAv(args[1]);
         regs.SetRegisterValue(args[0], av);
     }
 
@@ -423,7 +421,7 @@ public static class Commands
         Console.Write(regs.GetValue(args[0]));
     }
     
-    private static void WriteAV(RegList regs, string[] args)
+    private static void WriteAv(RegList regs, string[] args)
     {
         if (args.Length < 1)
         {
@@ -431,10 +429,10 @@ public static class Commands
             return;
         }
 
-        Console.Write(regs.GetAV(args[0]));
+        Console.Write(regs.GetAv(args[0]));
     }
     
-    private static void WriteLV(RegList regs, string[] args)
+    private static void WriteLv(RegList regs, string[] args)
     {
         if (args.Length < 1)
         {
@@ -442,10 +440,10 @@ public static class Commands
             return;
         }
 
-        Console.Write(regs.GetLV(args[0]));
+        Console.Write(regs.GetLv(args[0]));
     }
 
-    private static void Exit(RegList regs, string[] _) => Environment.Exit(regs.GetAV("dr7"));
+    private static void Exit(RegList regs, string[] _) => Environment.Exit(regs.GetAv("dr7"));
 
     private static void GetKey(RegList regs, string[] args)
     {
@@ -457,8 +455,8 @@ public static class Commands
 
         var keyInfo = Console.ReadKey(true);
         regs[regName].Value = keyInfo.KeyChar;
-        regs[regName].AV = (int)keyInfo.Key;
-        regs[regName].FV = (int)keyInfo.Modifiers;
+        regs[regName].Av = (int)keyInfo.Key;
+        regs[regName].Fv = (int)keyInfo.Modifiers;
     }
 
     private static void ReadLine(RegList regs, string[] args)
@@ -473,7 +471,7 @@ public static class Commands
         regs[regName].Value = text;
     }
 
-    private static void ConvertSrcToAV(RegList regs, string[] args)
+    private static void ConvertSrcToAv(RegList regs, string[] args)
     {
         if (args.Length < 1)
         {
@@ -489,7 +487,7 @@ public static class Commands
         }
 
         regs.SetFlag(Flags.Failure, false);
-        reg.AV = v;
+        reg.Av = v;
     }
 
     private static void Write(RegList _, string[] args)
@@ -518,10 +516,10 @@ public static class Commands
         }
 
         if (!int.TryParse(args[0], out var value1))
-            value1 = regs.GetAV(args[0]);
+            value1 = regs.GetAv(args[0]);
         
         if (!int.TryParse(args[1], out var value2))
-            value2 = regs.GetAV(args[1]);
+            value2 = regs.GetAv(args[1]);
 
         regs.SetFlag(Flags.Zero, value1 == value2);
         regs.SetFlag(Flags.Positive, value1 > value2);
@@ -554,7 +552,7 @@ public static class Commands
             return;
         }
 
-        var value = regs.GetAV(args[0]);
+        var value = regs.GetAv(args[0]);
         regs.SetRegisterValue(args[0], value - 1);
     }
 
@@ -568,16 +566,16 @@ public static class Commands
         
         if (!int.TryParse(args[0], out var min))
         {
-            min = regs.GetAV(args[0]);
+            min = regs.GetAv(args[0]);
         }
         if (!int.TryParse(args[1], out var max))
         {
-            max = regs.GetAV(args[1]);
+            max = regs.GetAv(args[1]);
         }
 
         var value = System.Random.Shared.Next(min, max);
         regs["edi"].Value = "generated!";
-        regs["edi"].AV = value;
+        regs["edi"].Av = value;
     }
 
     private static void Increment(RegList regs, string[] args)
@@ -588,14 +586,14 @@ public static class Commands
             return;
         }
 
-        var value = regs.GetAV(args[0]);
+        var value = regs.GetAv(args[0]);
         regs.SetRegisterValue(args[0], value + 1);
     }
 
     private static void Loop(RegList regs, string[] args)
     {
-        regs.SetRegisterValue("ecx", regs.GetAV("ecx")-1);
-        if (regs.GetAV("ecx") <= 0)
+        regs.SetRegisterValue("ecx", regs.GetAv("ecx")-1);
+        if (regs.GetAv("ecx") <= 0)
             return;
         
         JumpUnconditional(regs, args); // jumps to the label
@@ -610,9 +608,9 @@ public static class Commands
         }
 
         var sourceValue = regs.GetValue(args[1]);
-        var av = regs.GetAV(args[1]);
-        var flags = regs.GetFV(args[1]);
-        var lv = regs.GetLV(args[1]);
+        var av = regs.GetAv(args[1]);
+        var flags = regs.GetFv(args[1]);
+        var lv = regs.GetLv(args[1]);
 
         regs.SetRegisterValue(args[0], sourceValue);
         regs.SetRegisterFlags(args[0], flags | (int)Flags.Copied);
@@ -650,7 +648,7 @@ public static class Commands
     {
         if (args.Length >= 1)
         {
-            regs.PushStack(regs.GetAV(args[0]));
+            regs.PushStack(regs.GetAv(args[0]));
         }
         else
         {
@@ -681,7 +679,7 @@ public static class Commands
 
     public static void GetRegs(RegList regs, string[] _)
     {
-        foreach (var (regName, reg) in regs)
+        foreach (var (_, reg) in regs)
             Console.WriteLine(reg.ToString());
     }
 
@@ -695,11 +693,11 @@ public static class Commands
 
         if (!int.TryParse(@params[1], out var num))
         {
-            num = regs.GetAV(@params[1]);
+            num = regs.GetAv(@params[1]);
         }
 
         var regName = @params[0];
-        var aV = regs.GetAV(regName);
+        var aV = regs.GetAv(regName);
         aV += num;
 
         regs.SetRegisterValue(regName, aV);
@@ -718,11 +716,11 @@ public static class Commands
 
         if (!int.TryParse(@params[1], out var num))
         {
-            num = regs.GetAV(@params[1]);
+            num = regs.GetAv(@params[1]);
         }
 
         var regName = @params[0];
-        var aV = regs.GetAV(regName);
+        var aV = regs.GetAv(regName);
         aV -= num;
 
         regs.SetRegisterValue(regName, aV);
@@ -740,11 +738,11 @@ public static class Commands
         }
         if (!int.TryParse(args[1], out var num))
         {
-            num = regs.GetAV(args[1]);
+            num = regs.GetAv(args[1]);
         }
 
         var regName = args[0];
-        var aV = regs.GetAV(regName);
+        var aV = regs.GetAv(regName);
         aV *= num;
 
         regs.SetRegisterValue(regName, aV);
@@ -763,11 +761,11 @@ public static class Commands
 
         if (!int.TryParse(@params[1], out var num))
         {
-            num = regs.GetAV(@params[1]);
+            num = regs.GetAv(@params[1]);
         }
 
         var regName = @params[0];
-        var aV = regs.GetAV(regName);
+        var aV = regs.GetAv(regName);
 
         if (num == 0)
         {
@@ -793,11 +791,11 @@ public static class Commands
         
         if (!int.TryParse(args[1], out var num))
         {
-            num = regs.GetAV(args[1]);
+            num = regs.GetAv(args[1]);
         }
 
         var regName = args[0];
-        var aV = regs.GetAV(regName);
+        var aV = regs.GetAv(regName);
         aV <<= num;
         
         regs.SetRegisterValue(regName, aV);
@@ -816,11 +814,11 @@ public static class Commands
         
         if (!int.TryParse(args[1], out var num))
         {
-            num = regs.GetAV(args[1]);
+            num = regs.GetAv(args[1]);
         }
 
         var regName = args[0];
-        var aV = regs.GetAV(regName);
+        var aV = regs.GetAv(regName);
         aV >>= num;
         
         regs.SetRegisterValue(regName, aV);
@@ -839,11 +837,11 @@ public static class Commands
 
         if (!int.TryParse(@params[1], out var num))
         {
-            num = regs.GetAV(@params[1]);
+            num = regs.GetAv(@params[1]);
         }
 
         var regName = @params[0];
-        var aV = regs.GetAV(regName);
+        var aV = regs.GetAv(regName);
 
         if (num == 0)
         {
@@ -869,11 +867,11 @@ public static class Commands
 
         if (!int.TryParse(args[1], out var num))
         {
-            num = regs.GetAV(args[1]);
+            num = regs.GetAv(args[1]);
         }
 
         var regName = args[0];
-        var aV = regs.GetAV(regName);
+        var aV = regs.GetAv(regName);
 
         aV &= num;
 
@@ -893,11 +891,11 @@ public static class Commands
 
         if (!int.TryParse(args[1], out var num))
         {
-            num = regs.GetAV(args[1]);
+            num = regs.GetAv(args[1]);
         }
 
         var regName = args[0];
-        var aV = regs.GetAV(regName);
+        var aV = regs.GetAv(regName);
 
         aV |= num;
 
@@ -917,11 +915,11 @@ public static class Commands
 
         if (!int.TryParse(args[1], out var num))
         {
-            num = regs.GetAV(args[1]);
+            num = regs.GetAv(args[1]);
         }
 
         var regName = args[0];
-        var aV = regs.GetAV(regName);
+        var aV = regs.GetAv(regName);
 
         aV ^= num;
 
