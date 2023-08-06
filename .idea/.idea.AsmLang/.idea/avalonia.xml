@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="GCTextEditor/App.axaml" value="GCTextEditor/GCTextEditor.csproj" />
+        <entry key="GCTextEditor/Resources/DarkTheme.axaml" value="GCTextEditor/GCTextEditor.csproj" />
+        <entry key="GCTextEditor/Resources/Resources.axaml" value="GCTextEditor/GCTextEditor.csproj" />
+        <entry key="GCTextEditor/Views/MainWindow.axaml" value="GCTextEditor/GCTextEditor.csproj" />
+      </map>
+    </option>
+  </component>
+</project>
