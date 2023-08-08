@@ -71,8 +71,82 @@ public static class Commands
             new Command("copyMem", CopyMem),
             new Command("cmpMem", CompareMemory),
             new Command("cmpStr", CompareString),
-            new Command("break", BreakPoint)
+            new Command("break", BreakPoint),
+            new Command("readfile", ReadFile),
+            new Command("createfile", CreateFile),
+            new Command("writefile", WriteFile),
         };
+    }
+
+    private static void WriteFile(RegList regs, string[] args)
+    {
+        if (args.Length < 2)
+        {
+            Console.WriteLine("Error: writefile takes in 2 args, a file path and the (file contents or memoryAddress)");
+            return;
+        }
+
+        var path = args[0];
+        var fileContents = args[1];
+
+        if (uint.TryParse(fileContents, out var memAdd))
+            fileContents = Util.ReadString(regs.Memory, memAdd);
+
+        if (fileContents == null)
+        {
+            regs.Fail(true);
+            return;
+        }
+        
+        File.WriteAllText(path, fileContents);
+        regs.Fail(false);
+    }
+    
+    private static void CreateFile(RegList regs, string[] args)
+    {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Error: createfile takes in a file path, 1 arg");
+            return;
+        }
+        
+        var path = args[0];
+        File.Create(path).Close();
+    }
+
+    private static void ReadFile(RegList regs, string[] args)
+    {
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Error: readfile takes in a file path, 1 arg");
+            return;
+        }
+        
+        var path = args[0];
+        var fileContents = File.ReadAllBytes(path);
+
+        var memoryBlock = Util.GetFreeMemory(regs.Memory, fileContents.Length, padding: 1);
+        
+        if (memoryBlock.startAddress == -1 || memoryBlock.endAddress == -1)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error: NOT ENOUGH MEMORY");
+            Console.ResetColor();
+
+            regs.Edi = -1; // Null 
+            return;
+        }
+        
+        for (var i = 0; i < fileContents.Length; i++)
+        {
+            var bit = fileContents[i];
+            var location = memoryBlock.startAddress + i;
+            
+            Util.WriteMemory(regs.Memory, (uint) location, bit);
+        }
+
+        Util.WriteMemory(regs.Memory, (uint)memoryBlock.endAddress, '\0');
+        regs.Edi = memoryBlock.startAddress;
     }
 
     // Read a value from memory at the specified address and store it in the destination register's AV
@@ -176,18 +250,16 @@ public static class Commands
     {
         if (args.Length != 1)
         {
-            Console.WriteLine("Error: printMem command expects 2 arguments.");
+            Console.WriteLine("Error: printMem command expects 1 arguments.");
             return;
         }
 
-        if (int.TryParse(args[0], out int startAddress))
-        {
-            Util.PrintMemory(regs.Memory, (uint)startAddress);
-        }
-        else
-        {
-            Console.WriteLine($"Error: Invalid memory range specified.");
-        }
+        var memAdd = args[0];
+        
+        if (!uint.TryParse(memAdd, out var startAddress))
+            startAddress = (uint) regs.GetAv(memAdd);
+        
+        Util.PrintMemory(regs.Memory, startAddress);
     }
     
     // Fill memory within the specified range with a given value

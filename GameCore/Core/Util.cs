@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace GameCore.Core;
 
 internal static class Util
@@ -73,6 +75,81 @@ internal static class Util
 
         memoryLabels["Reserved"] = memSize - 5000; // how many bits in reserved space?
     }
+
+    public static (int startAddress, int endAddress) GetFreeMemory(int[] memory, int desiredLength = 0, int padding = 0)
+    {
+        var start = -1;
+        var end = -1;
+        var currentLength = 0;
+
+        for (var i = 0; i < memory.Length; i++)
+        {
+            if (memory[i] != 0)
+            {
+                currentLength = 0;
+                start = -1;
+                end = -1;
+                continue;
+            }
+
+            if (start == -1)
+            {
+                start = i;
+            }
+
+            currentLength++;
+            end = i;
+
+
+            if (desiredLength <= 0 || currentLength < desiredLength) continue;
+            
+            if (padding == 0)
+                return (start, end);
+
+            var startPadding = start - padding;
+            var endPadding = end + padding;
+            var notCleared = false;
+            
+            if (startPadding >= 0)
+            {
+                for (var j = startPadding; j < start; j++)
+                {
+                    if (memory[j] == 0)
+                        continue;
+
+                    start++;
+                    currentLength = 0;
+                    end = -1;
+                    notCleared = true;
+                    break;
+                }
+                
+                if (notCleared) continue;
+            }
+
+            if (endPadding >= memory.Length) return (start, end);
+            
+            for (var j = endPadding; j > end; j--)
+            {
+                if (memory[j] == 0)
+                    continue;
+
+                start++;
+                currentLength = 0;
+                end = -1;
+                notCleared = true;
+                break;
+            }
+
+            if (notCleared) continue;
+
+            return (start, end);
+        }
+
+        return (start, end);
+    }
+
+
     
     // Read a value from memory at the specified address
     public static int ReadMemory(int[] memory, uint address)
@@ -81,11 +158,30 @@ internal static class Util
         {
             return memory[address];
         }
-        else
+
+        Console.WriteLine($"Error: Attempted to read from invalid memory address 0x{address:X}");
+        return 0;
+    }
+
+    public static string? ReadString(int[] memory, uint address)
+    {
+        if (address >= memory.Length)
         {
             Console.WriteLine($"Error: Attempted to read from invalid memory address 0x{address:X}");
-            return 0;
+            return null;
         }
+
+        var sb = new StringBuilder();
+        
+        for (var i = address; i < memory.Length; i++)
+        {
+            if (memory[i] == '\0')
+                break;
+            
+            sb.Append(Convert.ToChar(memory[i]));
+        }
+
+        return sb.ToString();
     }
 
     // Write a value to memory at the specified address

@@ -1,38 +1,4 @@
-#newline 10 ; the ASCII representation of the newline
-#input1Address 100 ; Memory address to store the first input
-#input2Address 101 ; Memory address to store the second input
-#resultAddress 102 ; Memory address to store the result
-
-; Read the first number from the user and store it in memory
-writeln "Enter the first number:"
-readline
-convertAV cr0
-writeRawMem %input1Address% cr0
-
-; Read the second number from the user and store it in memory
-writeln "Enter the second number:"
-readline
-convertAV cr0
-writeRawMem %input2Address% cr0
-
-; Load the first input from memory into eax
-readMem %input1Address%
-break
-mov eax .mem
-
-; Load the second input from memory into ebx
-readMem %input2Address%
-break
-mov ebx .mem
-
-; Add the two inputs and store the result in memory
-break
-add eax ebx
-writeRawMem %resultAddress% eax
-break
-
-; Display the result
-writeln "The sum is:"
-printRawMem %resultAddress% 0
-
-exit
+fillMem 0 10 0
+readfile stblib.gc
+writeAV edi
+printMem edi

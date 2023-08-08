@@ -61,12 +61,19 @@ public class RegList : Dictionary<string, Reg>
         set => this["eip"].Av = value;
     }
 
+    public int Edi
+    {
+        get => this["edi"].Av;
+        set => this["edi"].Av = value;
+    }
+
     public bool StackIsEmpty => _stackList.Count == 0;
 
     public void PushStack(int value)
     {
         _stackList.Add(value);
     }
+    
 
     public int PopStack()
     {
@@ -121,6 +128,12 @@ public class RegList : Dictionary<string, Reg>
         else
             this[".flags"].Fv &= ~(int)flag;
     }
+    
+    
+    public void Fail(bool value)
+    {
+        SetFlag(Flags.Failure, value);
+    }
 
     public bool GetFlag(Flags flag)
     {
@@ -131,4 +144,5 @@ public class RegList : Dictionary<string, Reg>
     public int GetAv(string regName) => TryGetValue(regName, out var reg) ? reg.Av : -1;
     public int GetFv(string regName) => TryGetValue(regName, out var reg) ? reg.Fv : 0;
     public long GetLv(string regName) => TryGetValue(regName, out var reg) ? reg.Lv : -1;
+
 }

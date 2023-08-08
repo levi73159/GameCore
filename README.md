@@ -10,6 +10,23 @@ The Game Machine usually supports Game Cubes to make the performance better and 
 
 Game Packs is like the Game Machines but less powerful but it is also compact, portable version and also supports the ability to install multiple Game Cubes on it.
 
+## How to setup
+
+### Windows:
+
+1. In order to use Game Core, you need to install the Game Machine Shell from the [gameMachineWeb] or [gameCoreRepo]
+2. Put it in your project folder or somewhere you can easily access
+3. Create a Game Core file in the project folder with the `.gc` extension, Right now we recommend you using VS Code and installing the [Assembly Language Support] or any asm language support
+4. Run this command `GameCoreShell.exe {filename}` or you cna just run `GameCoreShell.exe` then select the file.
+
+### Linux:
+
+1. In order to use Game Core, you need to install the Game Machine Shell from the [gameMachineWeb] or [gameCoreRepo]
+2. Put it in your project folder or somewhere you can easily access like the `/bin` folder
+3. Create a Game Core file in the project folder with the `.gc` extension, Right now we recommend you using VS Code and installing the [Assembly Language Support] or any asm language support
+4. Run this command `GameCoreShell {filename}` or you cna just run `GameCoreShell` then select the file.
+
+
 ## General Syntax
 
 Game Core uses a simplified syntax for writing commands. Each command consists of a keyword followed by its arguments. Arguments are separated by spaces.
@@ -27,7 +44,7 @@ Macros can be accessed by using the `%` symbol and then the name of the macro li
 
 ```nasm
 #PI Pie-314
-writeln Pie is %PI%
+writeln "Pie is %PI%"
 ```
 ### Importing files
 You can import files using the `#import` directive, which will replace the import statement with the file text. It can be used in the following syntax:
@@ -41,7 +58,7 @@ For example, consider a file named `functions.gc` with the following content:
 jmp functions_end
 
 sayHello:
-    writeln hello, world!
+    writeln "hello, world!"
     ret
 
 functions_end:
@@ -172,7 +189,7 @@ The language supports various commands that perform arithmetic operations, contr
 - `cmpMem memoryAddressA memoryAddressB size`: Compares the memory from `memoryAddressA` to `memoryAddressB`, with `size` being the block size. `Zero` flag will be set if `A` and `B` are equal to each other, `Overflow` flag will also be set if `memoryAddress` is out of bounds
 - `cmpStr memoryAddressA (memoryAddressB | string)`: Similar to `cmpMem` but if will compare until null termination.
 
-### Input/Output Commands
+### IO Commands
 
 - `writeSrc reg`: Displays the `SrcValue` of the specified register.
 - `writeAV reg`: Displays the `AV` of the specified register.
@@ -185,6 +202,9 @@ The language supports various commands that perform arithmetic operations, contr
 - `beep (optinal: frequency, duration)`: *windows only* makes a beep sound in the console 
 - `printRawMem start length`: prints the memory contents within the specified range from `start` to `end`.
 - `printMem start`: prints the character representation of the memory contents within the specified range from `start` to the next null character.
+- `readfile path`: reads the file contents from the specified `path` into memory and returns the memoryAddress into `edi`.
+- `createfile file`: creates `file`.
+- `writefile path (contents | memoryAddress)`: writes `contents` or the string at `memoryAddress` to the specified file at `path`.
 
 ### Special Commands
 
@@ -279,3 +299,5 @@ Game Core provides a basic set of commands for arithmetic operations, control fl
 
 
 [gameMachineWeb]: https://sites.google.com/view/thegamemachineweb/home
+[gameCoreRepo]: https://github.com/levi73159/GameCore
+[Assembly Language Support]: https://marketplace.visualstudio.com/items?itemName=Roncho.assembly-8086
